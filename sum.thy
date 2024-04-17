@@ -1,56 +1,45 @@
 theory sum
-  imports Main
+imports Main
 begin
 
-  primrec sum :: "nat \<Rightarrow> nat \<Rightarrow> nat" where
-    sum01: "sum x 0 = x" |
-    sum02: "sum x (Suc y) = Suc (sum x y)"
+primrec soma :: "nat ⇒ nat ⇒ nat" where
+  "soma x 0 = x" |
+  "soma x (Suc y) = Suc (soma x y)"
 
-  primrec mult :: "nat \<Rightarrow> nat \<Rightarrow> nat" where
-    mult01: "mult x 0 = 0"| 
-    mult02: "mult x (Suc y) = sum x (mult x y)"
+primrec mult :: "nat ⇒ nat ⇒ nat" where
+  multq1: "mult x 0 = 0" |
+  multq2: "mult x (Suc y) = soma x (mult x y)"
 
-theorem mult_commute: "\<forall> x y. mult x y = mult y x"
-proof (induction x)
-  case nat0:
-    show "mult nat0 y = mult y nat0"
-    by (simp add: mult01)
-  case nat_succ: m
-    show "mult (nat_succ m) y = mult y (nat_succ m)"
-    proof 
-      assume IH: "\<forall> x. mult x y = mult y x"
-      show "mult (nat_succ m) y = mult y (nat_succ m)"
-      by (simp add: IH mult02 ac [simp del: nat.simps]) (* Use associativity of "+" *)
-    qed
+lemma soma_add: "soma x y = x + y"
+  by (induct y arbitrary: x, simp_all)
+
+theorem mult_correct: "∀x y. mult x y = x * y"
+proof (rule allI, rule allI, induct_tac y)
+  fix x :: nat
+  show "mult x 0 = x * 0" by simp
+next
+  fix x y :: nat
+  assume ih: "mult x y = x * y"
+  show "mult x (Suc y) = x * (Suc y)"
+  proof -
+    have "mult x (Suc y) = soma x (mult x y)" by (simp only: mult.simps)
+    also have "... = soma x (x * y)" using ih by simp
+    also have "... = x + (x * y)" using soma_add by simp
+    also have "... = x * (Suc y)" by (simp add: add_mult_distrib2)
+    finally show ?thesis .
+  qed
 qed
 
 
-theorem mult_assoc: "\<forall> x y z. mult (mult x y) z = mult x (mult y z)"
-proof (induction x)
-  case nat0:
-    show "mult (mult nat0 y) z = mult nat0 (mult y z)"
-    by (simp add: mult01 mult.assoc)
-  case nat_succ: m
-    show "mult (mult (nat_succ m) y) z = mult (nat_succ m) (mult y z)"
-    proof
-      assume IH: "\<forall> x. mult (mult x y) z = mult x (mult y z)"
-      show "mult (mult (nat_succ m) y) z = mult (nat_succ m) (mult y z)"
-      by (simp add: IH mult02 mult.assoc)
-    qed
-qed
+(*-----2-----*)
+theorem mult_comut :"\<forall> x y::nat. mult x y = mult y x"
+proof (rule allI, induction y) 
+  show "∀x ::nat. mult x 0 = mult 0 x"
+  proof(rule allI)
+    fix a::nat
+    have "mult a 0 = 0" by (simp only: multq1)
+    also have "... = mult 0 a" by (arith)
+    sorry
 
-theorem mult_one: "\<forall> x. mult x 1 = x"
-proof (induction x)
-  case nat0:
-    show "mult nat0 1 = nat0"
-    by (simp add: mult01)
-  case nat_succ: m
-    show "mult (nat_succ m) 1 = nat_succ m"
-    proof
-      assume IH: "\<forall> x. mult x 1 = x"
-      show "mult (nat_succ m) 1 = nat_succ m"
-      by (simp add: IH mult02 ac [simp del: nat.simps]) (* Use associativity of "+" *)
-    qed
-qed
 
 end
