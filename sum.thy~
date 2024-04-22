@@ -32,19 +32,14 @@ qed
 
 
 (*-----2-----*)
-theorem mult_commutative: "∀x y. mult x y = mult y x"
-proof (induction y)
-  case 0
-    show ?case by (simp add: mult.simps)
-  next
-  case (Suc k)
-    assume IH: "mult x k = mult k x"
-    show "mult x (Suc k) = mult (Suc k) x"
-    proof -
-      have "mult x (Suc k) = mult x k + x" by (simp add: mult.simps)
-      also have "... = mult k x + x" using IH by simp
-      also have "... = mult (Suc k) x" by (simp add: mult.simps)
-      finally show ?thesis .
-    qed
-qed
+theorem mult_comut :"\<forall> x y::nat. mult x y = mult y x"
+proof (rule allI, induction y) 
+  show "∀x ::nat. mult x 0 = mult 0 x"
+  proof(rule allI)
+    fix a::nat
+    have "mult a 0 = 0" by (simp only: multq1)
+    also have "... = mult 0 a" by (arith)
+    sorry
+
+
 end
